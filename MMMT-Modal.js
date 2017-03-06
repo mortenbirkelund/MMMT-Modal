@@ -1,65 +1,109 @@
 
 
 Module.register("MMMT-Modal",{
+	
+		url: "",
+		youtube: "",
+		
 		// Default module config.
 		defaults: {
-				url: "",
-				height:"1700px",
-				width:"100%",
 				animationSpeed: 1000,
 		},
 
 	// Define required styles
 	getStyles: function() {
 		return [
-			'MMMT-Modal.css',  // this file will be loaded from the bootstrapcdn servers.
+			'MMMT-Modal.css'  // this file will be loaded from the bootstrapcdn servers.
 		]
 	},
+	// Define required scripts.
+	getScripts: function() {
+		return [
+			"moment.js",
+		];
+	},
+
+	
+	start: function() {
+		this.hide(this.config.animationSpeed);
+
+	},
+
 	// Override dom generator.
 	getDom: function() {
-		var wrapper = document.createElement("div");
-		if (this.config.url != "")
+		
+		
+		
+		//Only create the modal if nessesary
+		if (this.url != "" || this.youtube != "")
 		{
+			var wrapper = document.createElement("div");
+			// Creates the modal without content
 			var modal = document.createElement("div");
 			modal.className = "modal";
+			modal.id = "myModal";
 			var modalContent = document.createElement("div");
 			modalContent.className = "modal-content";
-			var span = document.createElement("span");
-			span.className = "close";
-			span.innerHTML = "&times;";
+			modal.appendChild(modalContent);	
+			var closeButton = document.createElement("span");
+			closeButton.className = "close";
+			closeButton.innerHTML = "&times;";
+			modalContent.appendChild(closeButton);
+
+			
 			var self = this;
-			span.addEventListener("click", function () {
+			closeButton.addEventListener("click", function () {
 				self.hide(self.config.animationSpeed,function () {
-					self.config.url = "";
+					self.url = "";
 					self.updateDom();
 				});
-
-				
 			});
-
-			modalContent.appendChild(span);
-			var iframe = document.createElement("iframe");
-			iframe.className = "iframe";
-			iframe.height = "100%";
-			iframe.width = "100%";
-			iframe.src = this.config.url;
+			modalContent.appendChild(closeButton);
 			
-			modalContent.appendChild(iframe);
-			modal.appendChild(modalContent);
-			wrapper.appendChild(modal);
-		}
+			// Creates the content 
+			if (this.url != "")
+			{
+				var iframe = document.createElement("iframe");
+				iframe.className = "iframe";
+				iframe.height = "100%";
+				iframe.width = "100%";
+				iframe.src = this.url;
+				modalContent.appendChild(iframe);	
 
-		
-		return wrapper;
+				window.onclick = function(event) {
+					if (event.target == modal) {
+						self.hide(self.config.animationSpeed,function () {
+							self.url = "";
+							self.updateDom();
+						});
+					}
+				};
+			}
+			else if (this.youtube != "")
+			{
+				
+				
+			}
+			else
+			{
+				return document.createElement("div");
+			}
+			
+			modal.appendChild(modalContent);
+			modal.style.display = "block";
+			wrapper.appendChild(modal);
+			return wrapper;
+		}		
+		return document.createElement("div");
 	},
 	
 	
 	// Override the default NotificationRecieved function
     notificationReceived: function (notification, payload, sender) {
-        if (notification === "CHANGE_URL") {
+        if (notification === "OPEN_URL") {
 			var self = this;
 			this.show(this.config.animationSpeed,function () {
-				self.config.url = payload;
+				self.url = payload;
 				self.updateDom();
 			});
         } 
